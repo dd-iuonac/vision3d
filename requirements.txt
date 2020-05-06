@@ -1,3 +1,5 @@
 yacs
 tqdm
 visdom
+matplotlib
+opencv-python

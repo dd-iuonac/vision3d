@@ -18,18 +18,18 @@ def viz_detections(points, boxes):
 
 
 def get_model(cfg):
-    cfg.merge_from_file('../configs/second/car.yaml')
+    cfg.merge_from_file('../configs/carla/car.yaml')
     anchors = AnchorGenerator(cfg).anchors
     preprocessor = Preprocessor(cfg)
     model = Second(cfg).cuda().eval()
-    ckpt = torch.load('../pvrcnn/ckpts/epoch_12.pth')['state_dict']
+    ckpt = torch.load('../pvrcnn/ckpts/carla/epoch_10.pth')['state_dict']
     model.load_state_dict(ckpt, strict=True)
     return model, preprocessor, anchors
 
 
 def main():
     model, preprocessor, anchors = get_model(cfg)
-    fpath = '../data/kitti/training/velodyne_reduced/000032.bin'
+    fpath = '../data/carla/training/velodyne_reduced/000032.bin'
     points = np.fromfile(fpath, np.float32).reshape(-1, 4)
     with torch.no_grad():
         item = preprocessor(dict(points=[points], anchors=anchors))

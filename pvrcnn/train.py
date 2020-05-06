@@ -5,7 +5,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import multiprocessing
 
-from pvrcnn.detector import ProposalLoss, PV_RCNN, Second
+from pvrcnn.detector import ProposalLoss, Second
 from pvrcnn.core import cfg, TrainPreprocessor, VisdomLinePlotter
 from pvrcnn.dataset import KittiDatasetTrain
 
@@ -21,14 +21,14 @@ def build_train_dataloader(cfg, preprocessor):
 
 
 def save_cpkt(model, optimizer, epoch, meta=None):
-    fpath = f'./ckpts/epoch_{epoch}.pth'
+    fpath = f'./ckpts/carla/epoch_{epoch}.pth'
     ckpt = dict(
         state_dict=model.state_dict(),
         optimizer=optimizer.state_dict(),
         epoch=epoch,
         meta=meta,
     )
-    os.makedirs('./ckpts', exist_ok=True)
+    os.makedirs('./ckpts/carla/', exist_ok=True)
     torch.save(ckpt, fpath)
 
 
@@ -74,6 +74,8 @@ def train_model(model, dataloader, optimizer, lr_scheduler, loss_fn, epochs, sta
 
 def build_lr_scheduler(optimizer, cfg, start_epoch, N):
     last_epoch = start_epoch * N / cfg.TRAIN.BATCH_SIZE
+    if last_epoch == 0:
+        last_epoch = -1
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer, max_lr=0.01, steps_per_epoch=N,
         epochs=cfg.TRAIN.EPOCHS, last_epoch=last_epoch)
@@ -88,7 +90,7 @@ def main():
     preprocessor = TrainPreprocessor(cfg)
     dataloader = build_train_dataloader(cfg, preprocessor)
     optimizer = torch.optim.Adam(parameters, lr=0.01)
-    start_epoch = load_ckpt('./ckpts/epoch_10.pth', model, optimizer)
+    start_epoch = load_ckpt('./ckpts/carla/epoch_10.pth', model, optimizer)
     scheduler = build_lr_scheduler(optimizer, cfg, start_epoch, len(dataloader))
     train_model(model, dataloader, optimizer,
         scheduler, loss_fn, cfg.TRAIN.EPOCHS, start_epoch)
@@ -100,6 +102,6 @@ if __name__ == '__main__':
     except RuntimeError:
         pass
     global plotter
-    plotter = VisdomLinePlotter(env='second')
-    cfg.merge_from_file('../configs/second/car.yaml')
+    plotter = VisdomLinePlotter(env='carla')
+    cfg.merge_from_file('../configs/carla/car.yaml')
     main()

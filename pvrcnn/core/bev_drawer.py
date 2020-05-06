@@ -81,4 +81,4 @@ class Drawer:
             line_loc = corners[:, [1, 2, 2, 3, 3, 0]].reshape(-1, 4)
             text_loc = corners[:, 0] + 0.3
             self.draw_lines(line_loc)
-            self.draw_text(text_loc, labels=[])
+            self.draw_text(text_loc, labels=labels)
